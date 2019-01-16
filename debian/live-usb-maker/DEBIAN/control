@@ -1,0 +1,10 @@
+Package: live-usb-maker
+Version: 0.3.5
+Architecture: all
+Maintainer: anticapitalista <antiX@operamail.com>
+Installed-Size: 111
+Depends: cli-shell-utils, extlinux, syslinux-common, parted, wamerican, dict
+Section: system
+Priority: required
+Homepage: https://github.com/antiX-Linux/live-usb-maker
+Description: Create an antiX/MX LiveUSB.

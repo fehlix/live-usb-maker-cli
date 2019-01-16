@@ -1,3 +1,9 @@
+live-usb-maker (0.3.5) unstable; urgency=medium
+
+  * upstream changes to use fuseiso
+
+ -- anticapitalista <antix@operamail.com>  Wed, 09 Jan 2019 17:10:09 +0200
+
 live-usb-maker (0.3.4) unstable; urgency=medium
 
   * Fix bug in fatal error message "The live media is not mounted" 
