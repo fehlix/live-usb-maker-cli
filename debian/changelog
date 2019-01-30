@@ -1,3 +1,9 @@
+live-usb-maker (0.3.6) unstable; urgency=medium
+
+  * upstream changes to fix/improve dd-live-usb
+
+ -- anticapitalista <antix@operamail.com>  Tue, 22 Jan 2019 18:59:17 +0200
+
 live-usb-maker (0.3.5) unstable; urgency=medium
 
   * upstream changes to use fuseiso
