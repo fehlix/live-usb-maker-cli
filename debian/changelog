@@ -1,3 +1,9 @@
+live-usb-maker (0.4.0) unstable; urgency=medium
+
+  * Bump version to 2.41.07
+
+ -- anticapitalista <antix@operamail.com>  Fri, 11 Oct 2019 12:35:49 +0300
+
 live-usb-maker (0.3.14) unstable; urgency=medium
 
   * remove unneeded data-first-lum

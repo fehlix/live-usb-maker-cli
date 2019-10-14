@@ -8,8 +8,8 @@
 # License: GPLv3 or later
 #==============================================================================
 
-      VERSION="2.41.00"
- VERSION_DATE="Thu 06 Jun 2019 12:34:57 AM MDT"
+      VERSION="2.41.07"
+ VERSION_DATE="Thu 10 Oct 2019 11:20:26 PM MDT"
 
         ME=${0##*/}
     MY_DIR=$(dirname "$(readlink -f $0)")
@@ -107,7 +107,7 @@ ORDERED_CMDS="$ORDERED_CMDS copy-main check-usb-md5 copy-bios copy-uefi uuids"
 ORDERED_CMDS="$ORDERED_CMDS cheats cheats-syslinux cheats-grub install encrypt-main encryption-initrd"
     ALL_CMDS="sizes all partition makefs copy cheats $ORDERED_CMDS"
 
-   ALL_FORCE="automount,flock,makefs,ultra-fit,usb,nofuse,fuse,uuids,nomd5,debug-copy"
+   ALL_FORCE="automount,flock,makefs,ultra-fit,usb,nofuse,fuse,uuids,nomd5,debug-copy,check-sh"
    ALL_PAUSE="exit,initrd,copy,uuids"
 
     LIB_PATH="$MY_LIB_DIR:$LIB_DIR"
@@ -187,13 +187,14 @@ Options:
                         clone=<xxx> to clone another live-usb
 
   -F --force=<xxx>      Force the options specfied:
-                               usb: Ignore usb/removable check
-                             nomd5: Don't check md5 of files copied to live-usb
-                         ultra-fit: don't warn about SanDisk utra-fit devices
-                            makefs: Make the ext4 filesystem even if one exists
-                         automount: don't temporarily disable antiX automounting
-                            nofuse: don't use fuseiso to mount iso files
-                              fuse: only use fuseiso to mount iso files
+                            automount:  don't temporarily disable antiX automounting
+                            fuse:       only use fuseiso to mount iso files
+                            initrd:     ignore Bash errors when copying initrd from directory
+                            makefs:     make the ext4 filesystem even if one exists
+                            nofuse:     don't use fuseiso to mount iso files
+                            nomd5:      don't check md5 of files copied to live-usb
+                            ultra-fit:  don't warn about SanDisk utra-fit devices
+                            usb: Ignore usb/removable check
 
   -- --gui-progress           All remaining args are used as a gui progress bar program
                               Example: --gui-progress yad --progress --auto-close
@@ -248,10 +249,7 @@ eval_early_argument() {
        -write-config|W) WRITE_CONFIG=true    ;;
        -reset-config|R) RESET_CONFIG=true    ;;
         -gpt|-gpt-pmbr) CMD_GPT=true         ;;
-              -force|F) FORCE="$FORCE,$val"  ;;
-              -force=*) FORCE="$FORCE,$val"  ;;
            -progress|P) PROGRESS=true        ;;
-                -pause) PAUSE="$PAUSE${PAUSE:+,}exit" ;;
                -help|h) usage                ;;
             -version|v) show_version         ;;
     esac
@@ -281,6 +279,8 @@ eval_argument() {
           -esp-size=*)  UEFI_SIZE=$val                   ;;
           -data-first)  DATA_FIRST=choose                ;;
         -data-first=*)  DATA_FIRST=$val                  ;;
+             -force|F)  FORCE="$FORCE,$val"              ;;
+             -force=*)  FORCE="$FORCE,$val"              ;;
               -format)  FORMAT_USB=choose                ;;
             -format=*)  FORMAT_USB=$val                  ;;
               -from|f)  FROM=$val                        ;;
@@ -319,13 +319,11 @@ eval_argument() {
 
        # These are read early.  They are not unknown
 
-             -force|F)                                   ;;
-             -force=*)                                   ;;
      -ignore-config|I)                                   ;;
       -reset-config|R)                                   ;;
       -write-config|W)                                   ;;
 
-               *)  fatal $"Unknown parameter %s" "-$arg"  ;;
+              *)  fatal $"Unknown parameter %s" "-$arg"  ;;
     esac
 }
 
@@ -381,7 +379,6 @@ main() {
     # Let non-root users get usage.  Need to get --ignore-config early.
     read_early_params "$@"
 
-    force fuse && force nofuse && fatal $"Cannot force both %s and %s" "$(pqw fuse)" "$(pqw nofuse)"
     need_root
     EXIT_NUM=100
 
@@ -406,6 +403,8 @@ main() {
 
     read_all_cmdline_mingled "$@"
     set_colors $COLOR_SCHEME
+
+    force fuse && force nofuse && fatal $"Cannot force both %s and %s" "$(pqw fuse)" "$(pqw nofuse)"
 
     validate_data_first CMD_SIZE "$DATA_FIRST"
 
@@ -475,8 +474,8 @@ main() {
         fatal_z "$TARGET"  "No --target was given while in %s mode" gui
     fi
 
-    shout_title $"Starting %s" "$ME"
-    set_window_title "$ME"
+    shout_title $"Starting %s" "$ME $VERSION"
+    set_window_title "$ME $VERSION"
     start_log "$THE_LOG_FILE" "$orig_args"
 
     # NOTE: this placement is not ideal because it allows the user to
@@ -530,7 +529,11 @@ main() {
 
     # Check cmdline target *before* the first menu
     if [ ${#TARGET} -eq 0 ]; then
-        select_target_device TARGET "$live_dev" "$FROM"
+        if need_q update-initrd; then
+            select_target_device TARGET "" "$FROM"
+        else
+            select_target_device TARGET "$live_dev" "$FROM"
+        fi
     else
         check_target "$TARGET" "$live_dev"
     fi
@@ -721,7 +724,7 @@ main() {
     given_cmd sizes && my_exit 0
 
     # Make sure the target is not in use
-    umount_all $target_dev
+    need_q update-initrd || umount_all $target_dev
 
     local encrypted_lab=""
 
@@ -751,6 +754,10 @@ main() {
         makefs_select FORMAT_USB $"data usb-stick"
         msg $"Will create a %s filesystem" "$(pq $FORMAT_USB)"
     elif [ -d "$INITRD_FILE" ]; then
+
+        # Some quick checks
+        force check-sh && check_recent_executables "$INITRD_FILE"
+
         msg $"Will update the initrd from directory %s" "$(pq $INITRD_FILE)"
     elif [ -f "$INITRD_FILE" ]; then
         msg $"Will update the initrd from file %s" "$(pq $INITRD_FILE)"
@@ -802,7 +809,7 @@ main() {
     #sleep ${AUTOMOUNT_DELAY:-1}
 
     # Make sure the new target partitions get unmounted if they were auto-mounted
-    umount_all $target_dev
+    need_q update-initrd || umount_all $target_dev
 
     # Nothing else makes sense if there is no partition table
     need_q partition-clear && ! need_q partition-make && exit_done
@@ -1486,6 +1493,7 @@ guess_partitioning() {
         ext4:cryto_LUKS:vfat:*) ENCRYPT=true    ; CRYPT_PART=$part2         ;;
        *:ext4:crypto_LUKS:vfat) ENCRYPT=true    ; CRYPT_PART=$part3
                                 DATA_FIRST=true ; DATA_FIRST_FS=$fs1        ;;
+            # This does not look like a live-usb device <device signature>
         *)  fatal $"This does not look like a live-usb device %s" "$fs_str" ;;
     esac
 
@@ -2043,7 +2051,7 @@ do_makefs_ext() {
 #------------------------------------------------------------------------------
 do_makefs_uefi() {
     local uefi_dev=$1  label=${2:-LIVE-ESP}
-    cmd mkfs.vfat -n "${label^^}" $uefi_dev \
+    cmd mkfs.vfat -F 32 -n "${label^^}" $uefi_dev \
         || dmesg_fatal $"Could not make %s file system on %s" "fat32" "$uefi_dev"
 }
 
@@ -2669,6 +2677,26 @@ update_initrd() {
 }
 
 #------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+check_recent_executables() {
+    local dir=$1  file  bash_error  cnt=0
+    while read file; do
+        head -n1 "$file" | egrep -q "^#\!(/live)?/bin/[a-z]*sh" || continue
+        cnt=$((cnt + 1))
+        bash -n "$file" && continue
+        warn 'Bash errors in file %s' "$(pqw "$file")"
+        bash_error=true
+    done<<Recent_Execs
+$(find "$dir"/[a-z]* -maxdepth 3 -type f -executable -ctime -2)
+Recent_Execs
+
+    msg "Checked %s recent executables under %s" "$(nq $cnt)" "$(pq "$dir")"
+
+    [ "$bash_error" ] && fatal 'One or more Bash errors were detected'
+}
+
+#------------------------------------------------------------------------------
 # Copy the initrd-release file (if needed)
 #------------------------------------------------------------------------------
 copy_initrd_release() {
@@ -2747,8 +2775,9 @@ make_fs_dev() {
         fat32) fstype=vfat ;;
     esac
     case $fstype in
-        vfat|exfat) args="-n $label" ;;
-          ext[234]) args="-L $label" ;;
+             exfat) args="-n $label"        ;;
+              vfat) args="-F 32 -n $label"  ;;
+          ext[234]) args="-L $label"        ;;
               ntfs) args="--fast -L $label" ;;
     esac
 
