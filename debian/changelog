@@ -1,3 +1,16 @@
+live-usb-maker (0.4.2) unstable; urgency=medium
+
+  * Bump version to 2.41.09 (default to luks1) 
+
+ -- anticapitalista <antix@operamail.com>  Fri, 18 Oct 2019 14:24:19 +0300
+
+live-usb-maker (0.4.1) unstable; urgency=medium
+
+  * make sure file exist before testing it as a shell script
+  * version 2.41.08
+
+ -- anticapitalista <antix@operamail.com>  Thu, 17 Oct 2019 16:04:40 +0300
+
 live-usb-maker (0.4.0) unstable; urgency=medium
 
   * Bump version to 2.41.07
