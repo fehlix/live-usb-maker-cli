@@ -37,7 +37,7 @@ test -d "$domain_dir" && export TEXTDOMAINDIR=$domain_dir
       MAIN_MARGIN="20"
       UEFI_MARGIN="5"
 
-     EXT4_OPTIONS="-m0 -i100000 -J size=32"
+     EXT4_OPTIONS="-m0 -i16384 -J size=32"
        BIOS_LABEL="Live-usb"
         ESP_LABEL="LIVE-UEFI"
 
