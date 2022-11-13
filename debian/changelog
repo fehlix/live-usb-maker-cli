@@ -1,8 +1,14 @@
-live-usb-maker (0.4.9) unstable; urgency=medium
+live-usb-maker (0.4.10) unstable; urgency=medium
 
   * FIX: cloning live system encrypted
 
  -- Peter Sagi <peter.sagi.s@gmail.com>  Sun Oct  9 19:37:08 CEST 2022
+
+live-usb-maker (0.4.9) unstable; urgency=medium
+
+  * Fix parted parsing for non-english locale - thanks graybatonrandomstuff
+
+ -- anticapitalista <antix@operamail.com>  Thu, 10 Nov 2022 16:06:33 +0200
 
 live-usb-maker (0.4.8) unstable; urgency=medium
 
