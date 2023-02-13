@@ -8,8 +8,8 @@
 # License: GPLv3 or later
 #==============================================================================
 
-      VERSION="2.41.18"
- VERSION_DATE="Sat Dec 19 02:26:36 PM MST 2020"
+      VERSION="2.41.19"
+ VERSION_DATE="Sun Oct  9 19:37:08 CEST 2022"
 
         ME=${0##*/}
     MY_DIR=$(dirname "$(readlink -f $0)")
@@ -670,6 +670,9 @@ main() {
                 fi
 
                 clone_directory "$from_value" "$bios_dir" "$ISO_DIR"  "$live_dev"
+                if [ "$CLONE_ENCRYPTED_LIVE" ]; then
+                     cmd umount $BIOS_DIR
+		fi
                 # What thing we are copying or cloning from: file, device or directory
                 from_thing=$"directory"
 
