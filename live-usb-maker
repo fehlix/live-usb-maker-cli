@@ -15,7 +15,7 @@
     MY_DIR=$(dirname "$(readlink -f $0)")
 MY_LIB_DIR=$(readlink -f "$MY_DIR/../cli-shell-utils")
    LIB_DIR="/usr/lib/cli-shell-utils"
-   if ( -d "/usr/local/lib/cli-shell-utils" ); then
+   if [ -d "/usr/local/lib/cli-shell-utils" ]; then
        LIB_DIR="/usr/local/lib/cli-shell-utils"
    fi
    
