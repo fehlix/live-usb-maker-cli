@@ -1,3 +1,9 @@
+live-usb-maker (0.4.17) mx; urgency=medium
+
+  * mark data partitions for type of partition (MS compatibility thing)
+
+ -- Dolphin Oracle <dolphinoracle@gmail.com>  Tue, 12 Aug 2025 22:49:59 -0400
+
 live-usb-maker (0.4.15) mx; urgency=medium
 
   * fix syntax in lib check
