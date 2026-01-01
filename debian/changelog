@@ -1,3 +1,9 @@
+live-usb-maker (2.41.23+1) mx; urgency=medium
+
+  * replace lib path line in dd-live-usb
+
+ -- Dolphin Oracle <dolphinoracle@gmail.com>  Thu, 01 Jan 2026 16:08:59 -0500
+
 live-usb-maker (2.41.23) mx; urgency=medium
 
   * version bump
