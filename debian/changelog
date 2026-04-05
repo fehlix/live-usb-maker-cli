@@ -1,3 +1,10 @@
+live-usb-maker (2.41.24) UNRELEASED; urgency=medium
+
+  * add --grub-mbr switch to force grub2 usage for mbr/legacy boots
+  * replaces syslinux boot change 
+
+ -- Dolphin Oracle <dolphinoracle@gmail.com>  Sat, 04 Apr 2026 22:15:25 -0400
+
 live-usb-maker (2.41.23+1) mx; urgency=medium
 
   * replace lib path line in dd-live-usb

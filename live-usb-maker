@@ -8,8 +8,8 @@
 # License: GPLv3 or later
 #==============================================================================
 
-      VERSION="2.41.23"
- VERSION_DATE="Thu, 01 Jan 2026"
+      VERSION="2.41.24"
+ VERSION_DATE="Sat, 04 Apr 2026"
 
         ME=${0##*/}
     MY_DIR=$(dirname "$(readlink -f $0)")
@@ -132,6 +132,9 @@ SYSLINUX_FILES="$SYSLINUX_FILES libmenu.c32 libutil.c32 linux.c32 menu.c32"
 
      LUKS_TYPE="luks2"
 
+
+    GRUB_MBR="false"
+
 #------------------------------------------------------------------------------
 # Show usage and exit
 #------------------------------------------------------------------------------
@@ -210,6 +213,7 @@ Options:
   -g --gpt                    Use gpt partitioning instead of msdos
   -G --graphic-ui             Use the new graphics user interface (default)
      --gpt-pmbr               Set pmbr_boot disk flag (prevents booting via UEFI)
+     --grub-mbr               Use grub for legacy boot (instead of syslinux)
   -h --help                   Show this usage
   -i --initrd=<file>          Update the initrd from using a template-initrd.gz
   -i --initrd=<dir>           Use a directory tree as a template
@@ -295,6 +299,7 @@ eval_argument() {
               -from|f)  FROM=$val                        ;;
               -from=*)  FROM=$val                        ;;
        --graphic-ui|G)  GRAPHICAL_MENUS=true             ;;
+            -grub-mbr)  GRUB_MBR=true                    ;;
                -gpt|g)  MSDOS_GPT="gpt"                  ;;
             -gpt-pmbr)  MSDOS_GPT="gpt" ; DO_PMBR=true   ;;
       -gui-progress|-)  END_CMDLINE=true                 ;;
@@ -2485,11 +2490,11 @@ fix_uefi_memtest() {
     # the copy.  *** sigh ***
 
     if test -e $fallback; then
-        cmd rm -f $fallback
+        cmd rm -f $fallback/home/dolphin/development/working/build-iso-mx-/build-iso-mx/work/iso/boot/grub/i386-pc/eltorito.img
         local flag
         [ "$PRETEND_MODE" ] && flag="--dry-run"
         local temp=$(mktemp -p $(dirname $dir) -d $flag)
-        cmd cp $dir/* $temp/
+        cmd cp $dir/* $temp//home/dolphin/development/working/build-iso-mx-/build-iso-mx/work/iso/boot/grub/i386-pc/eltorito.img
         cmd rm -r $dir
         cmd mv $temp $dir
     fi
@@ -2667,6 +2672,11 @@ random_string() {
 # This installs the legacy syslinux bootloader
 #------------------------------------------------------------------------------
 do_install_bootloader() {
+    if [[ "$GRUB_MBR" = "true" ]]; then
+        do_install_bootloader_grub "$@"
+        return
+    fi
+
     local dev=$1  bios_dir=$2  type=$3
 
     msg "extlinux version %s" "$(pq $(get_extlinux_version))"
@@ -2726,6 +2736,23 @@ do_install_bootloader() {
     [ -z "$syslinux_dir" ] && fatal "Could not find a syslinux or isolinux directory"
 
     cmd extlinux -i $syslinux_dir || fatal "%s command failed" extlinux
+}
+
+do_install_bootloader_grub() {
+    local dev=$1        # Target device (e.g., /dev/sda)
+    local bios_dir=$2   # Mount point of the boot partition
+    local type=$3       # Partition scheme (gpt or msdos)
+
+    msg "Installing GRUB2 for %s partitioning on %s" "$type" "$dev"
+
+    # 1. Install GRUB2 to the MBR of the target device
+    # --target=i386-pc is the standard for legacy BIOS/MBR systems
+    # --boot-directory tells GRUB where /boot is
+    # not making a new grub.cfg file since its a live system
+    cmd grub-install --target=i386-pc --boot-directory="$bios_dir/boot" "$dev" \
+        || fatal "grub-install failed on %s" "$dev"
+
+    msg "GRUB2 installation complete."
 }
 
 update_syslinux() {
