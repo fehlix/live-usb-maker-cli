@@ -2490,11 +2490,11 @@ fix_uefi_memtest() {
     # the copy.  *** sigh ***
 
     if test -e $fallback; then
-        cmd rm -f $fallback/home/dolphin/development/working/build-iso-mx-/build-iso-mx/work/iso/boot/grub/i386-pc/eltorito.img
+        cmd rm -f $fallback
         local flag
         [ "$PRETEND_MODE" ] && flag="--dry-run"
         local temp=$(mktemp -p $(dirname $dir) -d $flag)
-        cmd cp $dir/* $temp//home/dolphin/development/working/build-iso-mx-/build-iso-mx/work/iso/boot/grub/i386-pc/eltorito.img
+        cmd cp $dir/* $temp
         cmd rm -r $dir
         cmd mv $temp $dir
     fi
@@ -2752,6 +2752,8 @@ do_install_bootloader_grub() {
     cmd grub-install --target=i386-pc --boot-directory="$bios_dir/boot" "$dev" \
         || fatal "grub-install failed on %s" "$dev"
 
+   #comment out syslinux menus
+   sed -i '/^[^#]*switch_to_syslinux/s/^/#/' $bios_dir/boot/grub/config/bootmenu.cfg
     msg "GRUB2 installation complete."
 }
 

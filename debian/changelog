@@ -1,3 +1,9 @@
+live-usb-maker (2.41.25) mx; urgency=medium
+
+  * disable switch to syslinux menu if --grub-mbr used
+
+ -- Dolphin Oracle <dolphinoracle@gmail.com>  Mon, 06 Apr 2026 18:48:08 -0400
+
 live-usb-maker (2.41.24) mx; urgency=medium
 
   * add --grub-mbr switch to force grub2 usage for mbr/legacy boots
