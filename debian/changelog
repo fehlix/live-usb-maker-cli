@@ -3,8 +3,9 @@ live-usb-maker (2.41.26) mx; urgency=medium
   * keep syslinux if available
   * grub install improvements
   * gpt bios partition at front
+  * add --no-extlinux switch (development switch)
 
- -- Dolphin Oracle <dolphinoracle@gmail.com>  Thu, 09 Apr 2026 19:59:22 -0400
+ -- Dolphin Oracle <dolphinoracle@gmail.com>  Thu, 09 Apr 2026 21:58:58 -0400
 
 live-usb-maker (2.41.25) mx; urgency=medium
 
