@@ -18,7 +18,7 @@ MY_LIB_DIR=$(readlink -f "$MY_DIR/../cli-shell-utils")
    if [ -d "/usr/local/lib/cli-shell-utils" ]; then
        LIB_DIR="/usr/local/lib/cli-shell-utils"
    fi
-   
+
 export TEXTDOMAIN="cli-shell-utils"
 domain_dir="$MY_DIR/../cli-shell-utils/locale"
 test -d "$domain_dir" && export TEXTDOMAINDIR=$domain_dir
@@ -687,7 +687,7 @@ main() {
                 clone_directory "$from_value" "$bios_dir" "$ISO_DIR"  "$live_dev"
                 if [ "$CLONE_ENCRYPTED_LIVE" ]; then
                      cmd umount $BIOS_DIR
-		fi
+        fi
                 # What thing we are copying or cloning from: file, device or directory
                 from_thing=$"directory"
 
@@ -2145,32 +2145,32 @@ do_partition() {
         ##mark data partition
         #if gpt partition, use GUID for part type
         if [ $type = "gpt" ]; then
-	        mark="msftdata"
-	        echo $PREAMB set $PART_NUM $mark on
-        	cmd $PREAMB set $PART_NUM $mark on    
+            mark="msftdata"
+            echo $PREAMB set $PART_NUM $mark on
+            cmd $PREAMB set $PART_NUM $mark on
         fi
         #if msdos partition, use hexadecimal for part type, per format
         if [ $type = "msdos" ]; then
-	        case $fs_type in 
-	        fat32 | vfat) mark="c"  ;;
-	        exfat | ntfs) mark="7"  ;;
-	        *)  ;; #don't mark
+            case $fs_type in
+            fat32 | vfat) mark="c"  ;;
+            exfat | ntfs) mark="7"  ;;
+            *)  ;; #don't mark
 
-	        esac
-	        if [ -n "$mark" ]; then
-        	    echo sfdisk $dev $PART_NUM --part-type $mark 
-        	    cmd sfdisk $dev $PART_NUM --part-type $mark 
+            esac
+            if [ -n "$mark" ]; then
+                echo sfdisk $dev $PART_NUM --part-type $mark
+                cmd sfdisk $dev $PART_NUM --part-type $mark
             fi
-	    fi     
+        fi
     fi
-    
+
 
     if [ "$type" = "gpt" ] && [ "$GRUB_MBR" = "true" ]; then
         # bios_grub
         local bios_grub_size=2
         _add_partition "$bios_grub_size" ""  "bios_grub"
         mark="bios_grub"
-	    cmd $PREAMB set $PART_NUM $mark on || dmesg_fatal "$err_msg" esp-flag
+        cmd $PREAMB set $PART_NUM $mark on || dmesg_fatal "$err_msg" esp-flag
     fi
 
     if [ $bios_size -gt 0 ]; then
@@ -2178,7 +2178,7 @@ do_partition() {
         cmd $PREAMB set $PART_NUM $boot_flag on || dmesg_fatal "$err_msg" boot-flag-1
         main_fs=
     fi
- 
+
     _add_partition "$main_size" $main_fs  main
     if ! encrypt; then
         cmd $PREAMB set $PART_NUM $boot_flag on || dmesg_fatal "$err_msg" boot-flag-2
@@ -2800,7 +2800,7 @@ do_install_bootloader_grub() {
     else
         grub_dir="/usr/lib/grub/i386-pc"
     fi
-    
+
     msg "Installing GRUB2 for %s partitioning on %s" "$type" "$dev"
 
     # 1. Install GRUB2 to the MBR of the target device
@@ -2814,7 +2814,7 @@ do_install_bootloader_grub() {
         --directory="$grub_dir" \
         "$dev" \
         || fatal "grub-install failed on %s" "$dev"
-        
+
     # remove empty locale-dir created by grub-install
     if [ -d "$bios_dir/boot/grub/locale/" ]; then
         cmd rm -r "$bios_dir/boot/grub/locale/"
@@ -2823,7 +2823,7 @@ do_install_bootloader_grub() {
     if [ -f "$iso_dir/boot/grub/fonts/unicode.pf2" ]; then
         cmd cp "$iso_dir/boot/grub/fonts/unicode.pf2" "$bios_dir/boot/grub/fonts/"
     fi
-    
+
     # restore core.img and eltorito.img from iso
     if [ -f "$iso_dir/boot/grub/i386-pc/core.img" ]; then
         cmd cp "$iso_dir/boot/grub/i386-pc/core.img" "$bios_dir/boot/grub/i386-pc/"
@@ -2842,8 +2842,8 @@ do_install_bootloader_grub() {
             cmd cp "/usr/lib/grub/i386-pc/lnxboot.img" "$bios_dir/boot/grub/i386-pc/"
         fi
     fi
-    
-    # restore syslinux.bin from iso 
+
+    # restore syslinux.bin from iso
     if [ ! -f "$bios_dir/boot/syslinux/syslinux.bin" ] && [ -d "$bios_dir/boot/syslinux/" ]; then
         if [ -f "$iso_dir/boot/syslinux/syslinux.bin" ]; then
             cmd cp "$iso_dir/boot/syslinux/syslinux.bin" "$bios_dir/boot/syslinux/"
