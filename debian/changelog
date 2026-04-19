@@ -1,3 +1,10 @@
+live-usb-maker (2.41.27) mx; urgency=medium
+
+  * use partprobe on drive - not partition - for leading data partition
+  * tidy up whitespaces (fix mixed tabs/spaces, normalize line endings)
+
+ -- fehlix <fehlix@mxlinux.org>  Sat, 18 Apr 2026 20:43:06 -0400
+
 live-usb-maker (2.41.26) mx; urgency=medium
 
   * keep syslinux if available

@@ -8,8 +8,8 @@
 # License: GPLv3 or later
 #==============================================================================
 
-      VERSION="2.41.26"
- VERSION_DATE="Sat, 09 Apr 2026"
+      VERSION="2.41.27"
+ VERSION_DATE="Sat, 18 Apr 2026"
 
         ME=${0##*/}
     MY_DIR=$(dirname "$(readlink -f $0)")
@@ -3127,7 +3127,7 @@ make_fs_dev() {
         || dmesg_fatal $"Could not make %s file system on %s" "$fstype" "$part"
 
     sync
-    cmd partprobe "$part"
+    cmd partprobe "$(get_drive $part)"
 
     case $fstype in
         vfat|ntfs|exfat) return ;;
